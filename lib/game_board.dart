@@ -34,10 +34,17 @@ class _GameBoardState extends State<GameBoard> {
   List<int> blackKingPosition = [0, 4];
   bool checkStatus = false;
 
+  //state variables for undo/redo functionality
+  List<List<List<ChessPiece?>>> boardHistory = [];
+  List<List<int>> selectedPieceHistory = [];
+  List<bool> turnHistory = [];
+  int historyIndex = -1;
+
   @override
   void initState() {
     super.initState();
     _initializeBoard();
+    _saveBoardState();
   }
 
   //Initialize board
@@ -387,6 +394,8 @@ class _GameBoardState extends State<GameBoard> {
 
   //Move pieces
   void movePiece(int newRow, int newCol) {
+    //save the current state before moving
+    _saveBoardState();
     //If the new spot has an enemy piece
     if (board[newRow][newCol] != null) {
       //Add the captured piece to the appropriate list
@@ -443,6 +452,32 @@ class _GameBoardState extends State<GameBoard> {
     } else {
       // Change turns
       isWhiteTurn = !isWhiteTurn;
+    }
+  }
+
+  void _saveBoardState() {
+    boardHistory = boardHistory.sublist(0, historyIndex + 1);
+    boardHistory.add(List.generate(8, (i) => List.from(board[i])));
+    historyIndex++;
+  }
+
+  void undoMove() {
+    if (historyIndex > 0) {
+      historyIndex--;
+      setState(() {
+        board =
+            List.generate(8, (i) => List.from(boardHistory[historyIndex][i]));
+      });
+    }
+  }
+
+  void redoMove() {
+    if (historyIndex < boardHistory.length - 1) {
+      historyIndex++;
+      setState(() {
+        board =
+            List.generate(8, (i) => List.from(boardHistory[historyIndex][i]));
+      });
     }
   }
 
@@ -538,6 +573,12 @@ class _GameBoardState extends State<GameBoard> {
 
   //reset to new game
   void resetGame() {
+    //clear the history
+    boardHistory.clear();
+    selectedPieceHistory.clear();
+    turnHistory.clear();
+    historyIndex = -1;
+
     Navigator.pop(context);
     _initializeBoard();
     checkStatus = false;
@@ -567,6 +608,25 @@ class _GameBoardState extends State<GameBoard> {
                 isWhite: true,
               ),
             ),
+          ),
+
+          // Game Status and Control Buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.undo),
+                onPressed: undoMove,
+              ),
+              IconButton(
+                icon: const Icon(Icons.redo),
+                onPressed: redoMove,
+              ),
+              IconButton(
+                icon: const Icon(Icons.restart_alt),
+                onPressed: resetGame,
+              ),
+            ],
           ),
 
           //Game Status
@@ -608,6 +668,18 @@ class _GameBoardState extends State<GameBoard> {
                   );
                 }),
           ),
+
+          //Undo, Redo and restart buttons
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          //   children: [
+          //     ElevatedButton(onPressed: undoMove, child: const Text('Undo')),
+          //     ElevatedButton(onPressed: redoMove, child: const Text('Redo')),
+          //     ElevatedButton(
+          //         onPressed: resetGame, child: const Text('Restart')),
+          //   ],
+          // ),
+
           //black piece taken
           Expanded(
             child: GridView.builder(
