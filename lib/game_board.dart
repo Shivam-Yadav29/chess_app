@@ -21,10 +21,8 @@ class _GameBoardState extends State<GameBoard> {
 
   // list of valid moves of selected piece
   List<List<int>> validMoves = [];
-
   // A list of white pieces that have been taken by the black player
   List<ChessPiece> whitePiecesTaken = [];
-
   // A list of black pieces that have been taken by the white player
   List<ChessPiece> blackPiecesTaken = [];
 
@@ -190,7 +188,6 @@ class _GameBoardState extends State<GameBoard> {
     }
 
     int direction = piece.isWhite ? -1 : 1;
-
     switch (piece.type) {
       case ChessPieceType.pawn:
         // pawn can move forward if square is not occupied
@@ -415,11 +412,7 @@ class _GameBoardState extends State<GameBoard> {
     board[selectedRow][selectedCol] = null;
 
     //see if any king are under attack
-    if (isKingInCheck(!isWhiteTurn)) {
-      checkStatus = true;
-    } else {
-      checkStatus = false;
-    }
+    checkStatus = isKingInCheck(!isWhiteTurn);
 
     //clear selection
     setState(() {
@@ -431,10 +424,13 @@ class _GameBoardState extends State<GameBoard> {
 
     //check if it's checkmate
     if (isCheckMate(!isWhiteTurn)) {
+      String winner = isWhiteTurn ? "White" : "Black";
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text("CHECK MATE!"),
+          title: Text("CHECKMATE! $winner Wins!"),
+          content:
+              const Text("The game is over. Would you like to play again?"),
           actions: [
             //play again button
             TextButton(
@@ -444,9 +440,10 @@ class _GameBoardState extends State<GameBoard> {
           ],
         ),
       );
+    } else {
+      // Change turns
+      isWhiteTurn = !isWhiteTurn;
     }
-    //change turns
-    isWhiteTurn = !isWhiteTurn;
   }
 
   //Is king in check?
@@ -472,7 +469,6 @@ class _GameBoardState extends State<GameBoard> {
         }
       }
     }
-
     return false;
   }
 
@@ -547,7 +543,7 @@ class _GameBoardState extends State<GameBoard> {
     checkStatus = false;
     whitePiecesTaken.clear();
     blackPiecesTaken.clear();
-    whiteKingPosition = [7, 4];
+    whiteKingPosition = [7, 3];
     blackKingPosition = [0, 4];
     isWhiteTurn = true;
     setState(() {});
@@ -588,14 +584,12 @@ class _GameBoardState extends State<GameBoard> {
                   int col = index % 8;
 
                   bool isSelected = selectedRow == row && selectedCol == col;
-
                   bool isValidMove = false;
                   for (var position in validMoves) {
                     if (position[0] == row && position[1] == col) {
                       isValidMove = true;
                     }
                   }
-
                   bool isKingInCheckSquare = checkStatus &&
                       ((isWhiteTurn &&
                               row == whiteKingPosition[0] &&
