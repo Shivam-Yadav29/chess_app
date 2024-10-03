@@ -3,6 +3,7 @@ import 'package:chess_app/components/dead_piece.dart';
 import 'package:chess_app/components/piece.dart';
 import 'package:chess_app/components/square.dart';
 import 'package:chess_app/helper/helper_methods.dart';
+import 'package:chess_app/components/app_bar.dart';
 
 class GameBoard extends StatefulWidget {
   const GameBoard({super.key});
@@ -593,6 +594,11 @@ class _GameBoardState extends State<GameBoard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: CustomAppBar(
+        onLeadingPressed: () => Navigator.pop(context),
+        onSettingsPressed: () {},
+        showBackButton: true,
+      ),
       backgroundColor: const Color.fromARGB(255, 212, 209, 159),
       body: Column(
         children: [
@@ -611,23 +617,23 @@ class _GameBoardState extends State<GameBoard> {
           ),
 
           // Game Status and Control Buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.undo),
-                onPressed: undoMove,
-              ),
-              IconButton(
-                icon: const Icon(Icons.redo),
-                onPressed: redoMove,
-              ),
-              IconButton(
-                icon: const Icon(Icons.restart_alt),
-                onPressed: resetGame,
-              ),
-            ],
-          ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          //     IconButton(
+          //       icon: const Icon(Icons.undo),
+          //       onPressed: undoMove,
+          //     ),
+          //     IconButton(
+          //       icon: const Icon(Icons.redo),
+          //       onPressed: redoMove,
+          //     ),
+          //     IconButton(
+          //       icon: const Icon(Icons.restart_alt),
+          //       onPressed: resetGame,
+          //     ),
+          //   ],
+          // ),
 
           //Game Status
           Text(checkStatus ? "CHECK!" : ""),
@@ -669,7 +675,7 @@ class _GameBoardState extends State<GameBoard> {
                 }),
           ),
 
-          //Undo, Redo and restart buttons
+          // Undo, Redo and restart buttons
           // Row(
           //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           //   children: [
