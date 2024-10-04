@@ -52,7 +52,11 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                   width: MediaQuery.sizeOf(context).width,
                   height: MediaQuery.sizeOf(context).height * 1,
                   decoration: const BoxDecoration(
-                      color: Color.fromARGB(255, 136, 66, 66)),
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/chess-background.jpg'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                   child: Stack(
                     children: [
                       Align(

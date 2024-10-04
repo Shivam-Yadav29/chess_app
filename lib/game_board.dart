@@ -4,6 +4,8 @@ import 'package:chess_app/components/piece.dart';
 import 'package:chess_app/components/square.dart';
 import 'package:chess_app/helper/helper_methods.dart';
 import 'package:chess_app/components/app_bar.dart';
+import 'package:chess_app/helper/chess_logic.dart';
+import 'package:chess_app/helper/board_initializer.dart';
 
 class GameBoard extends StatefulWidget {
   const GameBoard({super.key});
@@ -50,112 +52,7 @@ class _GameBoardState extends State<GameBoard> {
 
   //Initialize board
   void _initializeBoard() {
-    List<List<ChessPiece?>> newBoard =
-        List.generate(8, (index) => List.generate(8, (index) => null));
-
-    for (int i = 0; i < 8; i++) {
-      newBoard[1][i] = ChessPiece(
-        type: ChessPieceType.pawn,
-        isWhite: false,
-        imagePath: 'assets/images/Chess_pdt60.png',
-      );
-      newBoard[6][i] = ChessPiece(
-        type: ChessPieceType.pawn,
-        isWhite: true,
-        imagePath: 'assets/images/Chess_pdt60.png',
-      );
-    }
-    //rook
-    newBoard[0][0] = ChessPiece(
-      type: ChessPieceType.rook,
-      isWhite: false,
-      imagePath: 'assets/images/Chess_rdt60.png',
-    );
-    newBoard[0][7] = ChessPiece(
-      type: ChessPieceType.rook,
-      isWhite: false,
-      imagePath: 'assets/images/Chess_rdt60.png',
-    );
-    newBoard[7][0] = ChessPiece(
-      type: ChessPieceType.rook,
-      isWhite: true,
-      imagePath: 'assets/images/Chess_rdt60.png',
-    );
-    newBoard[7][7] = ChessPiece(
-      type: ChessPieceType.rook,
-      isWhite: true,
-      imagePath: 'assets/images/Chess_rdt60.png',
-    );
-
-    // knight
-    newBoard[0][1] = ChessPiece(
-      type: ChessPieceType.knight,
-      isWhite: false,
-      imagePath: 'assets/images/Chess_ndt60.png',
-    );
-    newBoard[0][6] = ChessPiece(
-      type: ChessPieceType.knight,
-      isWhite: false,
-      imagePath: 'assets/images/Chess_ndt60.png',
-    );
-    newBoard[7][1] = ChessPiece(
-      type: ChessPieceType.knight,
-      isWhite: true,
-      imagePath: 'assets/images/Chess_ndt60.png',
-    );
-    newBoard[7][6] = ChessPiece(
-      type: ChessPieceType.knight,
-      isWhite: true,
-      imagePath: 'assets/images/Chess_ndt60.png',
-    );
-
-    //bishop
-    newBoard[0][2] = ChessPiece(
-      type: ChessPieceType.bishop,
-      isWhite: false,
-      imagePath: 'assets/images/Chess_bdt60.png',
-    );
-    newBoard[0][5] = ChessPiece(
-      type: ChessPieceType.bishop,
-      isWhite: false,
-      imagePath: 'assets/images/Chess_bdt60.png',
-    );
-    newBoard[7][2] = ChessPiece(
-      type: ChessPieceType.bishop,
-      isWhite: true,
-      imagePath: 'assets/images/Chess_bdt60.png',
-    );
-    newBoard[7][5] = ChessPiece(
-      type: ChessPieceType.bishop,
-      isWhite: true,
-      imagePath: 'assets/images/Chess_bdt60.png',
-    );
-
-    //queen
-    newBoard[0][3] = ChessPiece(
-      type: ChessPieceType.queen,
-      isWhite: false,
-      imagePath: 'assets/images/Chess_qdt60.png',
-    );
-    newBoard[7][4] = ChessPiece(
-      type: ChessPieceType.queen,
-      isWhite: true,
-      imagePath: 'assets/images/Chess_qdt60.png',
-    );
-
-    //king
-    newBoard[0][4] = ChessPiece(
-      type: ChessPieceType.king,
-      isWhite: false,
-      imagePath: 'assets/images/Chess_kdt60.png',
-    );
-    newBoard[7][3] = ChessPiece(
-      type: ChessPieceType.king,
-      isWhite: true,
-      imagePath: 'assets/images/Chess_kdt60.png',
-    );
-
-    board = newBoard;
+    board = BoardInitializer.initializeBoard();
   }
 
   // pieces selection
@@ -187,195 +84,12 @@ class _GameBoardState extends State<GameBoard> {
     });
   }
 
-  //calculate raw valid moves
-  List<List<int>> calculateRawValidMoves(int row, int col, ChessPiece? piece) {
-    List<List<int>> candidateMoves = [];
-
-    if (piece == null) {
-      return [];
-    }
-
-    int direction = piece.isWhite ? -1 : 1;
-    switch (piece.type) {
-      case ChessPieceType.pawn:
-        // pawn can move forward if square is not occupied
-        if (isInBoard(row + direction, col) &&
-            board[row + direction][col] == null) {
-          candidateMoves.add([row + direction, col]);
-        }
-        // pawns can move 2 square forward if at initial position
-        if ((row == 1 && !piece.isWhite) || (row == 6 && piece.isWhite)) {
-          if (isInBoard(row + 2 * direction, col) &&
-              board[row + 2 * direction][col] == null &&
-              board[row + direction][col] == null) {
-            candidateMoves.add([row + 2 * direction, col]);
-          }
-        }
-        // pawn can kill diagonally
-        if (isInBoard(row + direction, col - 1) &&
-            board[row + direction][col - 1] != null &&
-            board[row + direction][col - 1]!.isWhite != piece.isWhite) {
-          candidateMoves.add([row + direction, col - 1]);
-        }
-        if (isInBoard(row + direction, col + 1) &&
-            board[row + direction][col + 1] != null &&
-            board[row + direction][col + 1]!.isWhite != piece.isWhite) {
-          candidateMoves.add([row + direction, col + 1]);
-        }
-        break;
-
-      case ChessPieceType.rook:
-        // horizontal and vertical
-        var directions = [
-          [-1, 0],
-          [1, 0],
-          [0, -1],
-          [0, 1],
-        ];
-        for (var direction in directions) {
-          var i = 1;
-          while (true) {
-            var newRow = row + i * direction[0];
-            var newCol = col + i * direction[1];
-            if (!isInBoard(newRow, newCol)) {
-              break;
-            }
-            if (board[newRow][newCol] != null) {
-              if (board[newRow][newCol]!.isWhite != piece.isWhite) {
-                candidateMoves.add([newRow, newCol]);
-              }
-              break;
-            }
-            candidateMoves.add([newRow, newCol]);
-            i++;
-          }
-        }
-        break;
-
-      case ChessPieceType.knight:
-        var knightMoves = [
-          [-2, -1],
-          [-2, 1],
-          [-1, -2],
-          [-1, 2],
-          [1, -2],
-          [1, 2],
-          [2, -1],
-          [2, 1],
-        ];
-        for (var move in knightMoves) {
-          var newRow = row + move[0];
-          var newCol = col + move[1];
-          if (!isInBoard(newRow, newCol)) {
-            continue;
-          }
-          if (board[newRow][newCol] != null) {
-            if (board[newRow][newCol]!.isWhite != piece.isWhite) {
-              candidateMoves.add([newRow, newCol]);
-            }
-            continue;
-          }
-          candidateMoves.add([newRow, newCol]);
-        }
-        break;
-
-      case ChessPieceType.bishop:
-        // diagonal move
-        var directions = [
-          [-1, -1],
-          [-1, 1],
-          [1, -1],
-          [1, 1],
-        ];
-        for (var direction in directions) {
-          var i = 1;
-          while (true) {
-            var newRow = row + i * direction[0];
-            var newCol = col + i * direction[1];
-            if (!isInBoard(newRow, newCol)) {
-              break;
-            }
-            if (board[newRow][newCol] != null) {
-              if (board[newRow][newCol]!.isWhite != piece.isWhite) {
-                candidateMoves.add([newRow, newCol]);
-              }
-              break;
-            }
-            candidateMoves.add([newRow, newCol]);
-            i++;
-          }
-        }
-        break;
-
-      case ChessPieceType.queen:
-        // all 8 directions
-        var directions = [
-          [-1, 0],
-          [1, 0],
-          [0, -1],
-          [0, 1],
-          [-1, -1],
-          [-1, 1],
-          [1, -1],
-          [1, 1],
-        ];
-        for (var direction in directions) {
-          var i = 1;
-          while (true) {
-            var newRow = row + i * direction[0];
-            var newCol = col + i * direction[1];
-            if (!isInBoard(newRow, newCol)) {
-              break;
-            }
-            if (board[newRow][newCol] != null) {
-              if (board[newRow][newCol]!.isWhite != piece.isWhite) {
-                candidateMoves.add([newRow, newCol]); //capture
-              }
-              break; //blocked
-            }
-            candidateMoves.add([newRow, newCol]);
-            i++;
-          }
-        }
-        break;
-
-      case ChessPieceType.king:
-        // all 8 directions
-        var directions = [
-          [-1, 0],
-          [1, 0],
-          [0, -1],
-          [0, 1],
-          [-1, -1],
-          [-1, 1],
-          [1, -1],
-          [1, 1],
-        ];
-        for (var direction in directions) {
-          var newRow = row + direction[0];
-          var newCol = col + direction[1];
-          if (!isInBoard(newRow, newCol)) {
-            continue;
-          }
-          if (board[newRow][newCol] != null) {
-            if (board[newRow][newCol]!.isWhite != piece.isWhite) {
-              candidateMoves.add([newRow, newCol]); //capture
-            }
-            continue; //blocked
-          }
-          candidateMoves.add([newRow, newCol]);
-        }
-        break;
-      default:
-    }
-    return candidateMoves;
-  }
-
   //real valid moves
   List<List<int>> calculateRealValidMoves(
       int row, int col, ChessPiece? piece, bool checkSimulation) {
     List<List<int>> realValidMoves = [];
-    List<List<int>> candidateMoves = calculateRawValidMoves(row, col, piece);
+    List<List<int>> candidateMoves =
+        ChessLogic.calculateRawValidMoves(row, col, piece, board);
     //after generating all candidate moves, filter out any that would result in check
     if (checkSimulation) {
       for (var move in candidateMoves) {
@@ -410,7 +124,7 @@ class _GameBoardState extends State<GameBoard> {
 
     //check if the piece being moved for check to king
     if (selectedPiece!.type == ChessPieceType.king) {
-      // update the appropriate king pos
+      // update the appropriate king position
       if (selectedPiece!.isWhite) {
         whiteKingPosition = [newRow, newCol];
       } else {
@@ -421,6 +135,78 @@ class _GameBoardState extends State<GameBoard> {
     board[newRow][newCol] = selectedPiece;
     board[selectedRow][selectedCol] = null;
 
+    // Check for pawn promotion
+    if (selectedPiece!.type == ChessPieceType.pawn) {
+      if ((selectedPiece!.isWhite && newRow == 0) ||
+          (!selectedPiece!.isWhite && newRow == 7)) {
+        _promotePawn(newRow, newCol);
+        return;
+      }
+    }
+
+    // Complete the move
+    _completeMoveAfterPromotion();
+  }
+
+  void _promotePawn(int row, int col) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Promote Pawn'),
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _promotionButton(ChessPieceType.queen, row, col),
+              _promotionButton(ChessPieceType.rook, row, col),
+              _promotionButton(ChessPieceType.bishop, row, col),
+              _promotionButton(ChessPieceType.knight, row, col),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _promotionButton(ChessPieceType pieceType, int row, int col) {
+    String pieceCode;
+    switch (pieceType) {
+      case ChessPieceType.queen:
+        pieceCode = 'q';
+        break;
+      case ChessPieceType.rook:
+        pieceCode = 'r';
+        break;
+      case ChessPieceType.knight:
+        pieceCode = 'n';
+        break;
+      case ChessPieceType.bishop:
+        pieceCode = 'b';
+        break;
+      default:
+        pieceCode = 'q';
+    }
+
+    String colorCode = selectedPiece!.isWhite ? 'l' : 'd';
+    String imagePath = 'assets/images/Chess_$pieceCode${colorCode}t60.png';
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).pop();
+        setState(() {
+          board[row][col] = ChessPiece(
+            type: pieceType,
+            isWhite: selectedPiece!.isWhite,
+            imagePath: imagePath,
+          );
+        });
+        _completeMoveAfterPromotion();
+      },
+      child: Image.asset(imagePath, width: 50, height: 50),
+    );
+  }
+
+  void _completeMoveAfterPromotion() {
     //see if any king are under attack
     checkStatus = isKingInCheck(!isWhiteTurn);
 
@@ -572,15 +358,40 @@ class _GameBoardState extends State<GameBoard> {
     return true;
   }
 
-  //reset to new game
   void resetGame() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Reset'),
+          content: const Text('Are you sure you want to reset the game?'),
+          actions: [
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                resetGameInternal();
+              },
+            ),
+            TextButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void resetGameInternal() {
     //clear the history
     boardHistory.clear();
     selectedPieceHistory.clear();
     turnHistory.clear();
     historyIndex = -1;
 
-    Navigator.pop(context);
     _initializeBoard();
     checkStatus = false;
     whitePiecesTaken.clear();
@@ -600,106 +411,123 @@ class _GameBoardState extends State<GameBoard> {
         showBackButton: true,
       ),
       backgroundColor: const Color.fromARGB(255, 212, 209, 159),
-      body: Column(
-        children: [
-          //White pieces taken
-          Expanded(
-            child: GridView.builder(
-              itemCount: whitePiecesTaken.length,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 8),
-              itemBuilder: (context, index) => DeadPiece(
-                imagePath: whitePiecesTaken[index].imagePath,
-                isWhite: true,
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/bg-img-1.jpg'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Column(
+          children: [
+            // Game Status and Control Buttons
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildControlButton(Icons.undo, undoMove, 'Undo'),
+                  const SizedBox(width: 16),
+                  _buildControlButton(Icons.redo, redoMove, 'Redo'),
+                  const SizedBox(width: 16),
+                  _buildControlButton(Icons.restart_alt, resetGame, 'Reset'),
+                ],
               ),
             ),
-          ),
 
-          // Game Status and Control Buttons
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   children: [
-          //     IconButton(
-          //       icon: const Icon(Icons.undo),
-          //       onPressed: undoMove,
-          //     ),
-          //     IconButton(
-          //       icon: const Icon(Icons.redo),
-          //       onPressed: redoMove,
-          //     ),
-          //     IconButton(
-          //       icon: const Icon(Icons.restart_alt),
-          //       onPressed: resetGame,
-          //     ),
-          //   ],
-          // ),
-
-          //Game Status
-          Text(checkStatus ? "CHECK!" : ""),
-          //Chess board
-          Expanded(
-            flex: 3,
-            child: GridView.builder(
-                itemCount: 8 * 8,
+            //White pieces taken
+            Expanded(
+              child: GridView.builder(
+                itemCount: whitePiecesTaken.length,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 8),
-                itemBuilder: (context, index) {
-                  int row = index ~/ 8;
-                  int col = index % 8;
-
-                  bool isSelected = selectedRow == row && selectedCol == col;
-                  bool isValidMove = false;
-                  for (var position in validMoves) {
-                    if (position[0] == row && position[1] == col) {
-                      isValidMove = true;
-                    }
-                  }
-                  bool isKingInCheckSquare = checkStatus &&
-                      ((isWhiteTurn &&
-                              row == whiteKingPosition[0] &&
-                              col == whiteKingPosition[1]) ||
-                          (!isWhiteTurn &&
-                              row == blackKingPosition[0] &&
-                              col == blackKingPosition[1]));
-
-                  return Square(
-                    isWhite: isWhite(index),
-                    piece: board[row][col],
-                    isSelected: isSelected,
-                    isValidMove: isValidMove,
-                    onTap: () => pieceSelected(row, col),
-                    isInCheck: isKingInCheckSquare,
-                  );
-                }),
-          ),
-
-          // Undo, Redo and restart buttons
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          //   children: [
-          //     ElevatedButton(onPressed: undoMove, child: const Text('Undo')),
-          //     ElevatedButton(onPressed: redoMove, child: const Text('Redo')),
-          //     ElevatedButton(
-          //         onPressed: resetGame, child: const Text('Restart')),
-          //   ],
-          // ),
-
-          //black piece taken
-          Expanded(
-            child: GridView.builder(
-              itemCount: blackPiecesTaken.length,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 8),
-              itemBuilder: (context, index) => DeadPiece(
-                imagePath: blackPiecesTaken[index].imagePath,
-                isWhite: false,
+                itemBuilder: (context, index) => DeadPiece(
+                  imagePath: whitePiecesTaken[index].imagePath,
+                  isWhite: true,
+                ),
               ),
             ),
+
+            //Game Status
+            // Text(checkStatus ? "CHECK!" : ""),
+            //Chess board
+            Expanded(
+              flex: 4,
+              child: GridView.builder(
+                  itemCount: 8 * 8,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 8),
+                  itemBuilder: (context, index) {
+                    int row = index ~/ 8;
+                    int col = index % 8;
+
+                    bool isSelected = selectedRow == row && selectedCol == col;
+                    bool isValidMove = false;
+                    for (var position in validMoves) {
+                      if (position[0] == row && position[1] == col) {
+                        isValidMove = true;
+                      }
+                    }
+                    bool isKingInCheckSquare = checkStatus &&
+                        ((isWhiteTurn &&
+                                row == whiteKingPosition[0] &&
+                                col == whiteKingPosition[1]) ||
+                            (!isWhiteTurn &&
+                                row == blackKingPosition[0] &&
+                                col == blackKingPosition[1]));
+
+                    return Square(
+                      isWhite: isWhite(index),
+                      piece: board[row][col],
+                      isSelected: isSelected,
+                      isValidMove: isValidMove,
+                      onTap: () => pieceSelected(row, col),
+                      isInCheck: isKingInCheckSquare,
+                    );
+                  }),
+            ),
+
+            //black piece taken
+            Expanded(
+              child: GridView.builder(
+                itemCount: blackPiecesTaken.length,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 8),
+                itemBuilder: (context, index) => DeadPiece(
+                  imagePath: blackPiecesTaken[index].imagePath,
+                  isWhite: false,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildControlButton(
+      IconData icon, VoidCallback onPressed, String tooltip) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.8),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
           ),
         ],
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: Colors.black87),
+        onPressed: onPressed,
+        tooltip: tooltip,
+        padding: const EdgeInsets.all(12),
       ),
     );
   }
