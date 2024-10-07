@@ -33,99 +33,96 @@ class _HomePageWidgetState extends State<HomePageWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    const double topMargin = 80.0;
+    const double sideMargin = 20.0;
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         key: scaffoldKey,
-        appBar: CustomAppBar(
-          onLeadingPressed: () {},
-          onSettingsPressed: () {},
+        appBar: const CustomAppBar(
+          onLeadingPressed: null,
+          onSettingsPressed: null,
         ),
         body: SizedBox(
-          height: MediaQuery.sizeOf(context).height * 1,
+          height: size.height,
           child: Stack(
             alignment: const AlignmentDirectional(0, -1),
             children: [
-              Align(
-                alignment: const AlignmentDirectional(-0.1, 0.16),
-                child: Container(
-                  width: MediaQuery.sizeOf(context).width,
-                  height: MediaQuery.sizeOf(context).height * 1,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/chess-background.jpg'),
-                      fit: BoxFit.cover,
+              Container(
+                width: size.width,
+                height: size.height,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/chess-background.jpg'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Container(
+                      alignment: const AlignmentDirectional(0, -0.88),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.asset(
+                          'assets/images/chess-home-img.png',
+                          width: 350,
+                          height: 200,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
-                  ),
-                  child: Stack(
-                    children: [
-                      Align(
-                        alignment: const AlignmentDirectional(0, -0.88),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.asset(
-                            'assets/images/chess-home-img.png',
-                            width: 350,
-                            height: 200,
-                            fit: BoxFit.contain,
-                          ),
+                    Align(
+                      child: Container(
+                        margin: const EdgeInsets.only(
+                            top: topMargin,
+                            left: sideMargin,
+                            right: sideMargin),
+                        child: ListView(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          children: [
+                            _buildGameOption(
+                              context,
+                              icon: const FaIcon(
+                                FontAwesomeIcons.puzzlePiece,
+                                color: Color(0xFF855353),
+                                size: 24,
+                              ),
+                              text: 'Puzzle',
+                            ),
+                            const SizedBox(height: 10),
+                            _buildGameOption(
+                              context,
+                              icon: const FaIcon(
+                                FontAwesomeIcons.robot,
+                                color: Color(0xFF855353),
+                                size: 24,
+                              ),
+                              text: 'Play with CPU',
+                            ),
+                            const SizedBox(height: 10),
+                            _buildGameOption(
+                              context,
+                              icon: const Icon(
+                                Icons.people_alt,
+                                color: Color(0xFF855353),
+                                size: 24,
+                              ),
+                              text: '2 Players',
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const GameBoard()),
+                                );
+                              },
+                            ),
+                          ],
                         ),
                       ),
-                      Align(
-                        alignment: const AlignmentDirectional(0, 0),
-                        child: Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              10, 0, 10, 0),
-                          child: ListView(
-                            padding: EdgeInsets.zero,
-                            primary: false,
-                            shrinkWrap: true,
-                            scrollDirection: Axis.vertical,
-                            children: [
-                              _buildGameOption(
-                                context,
-                                icon: const FaIcon(
-                                  FontAwesomeIcons.puzzlePiece,
-                                  color: Color(0xFF855353),
-                                  size: 24,
-                                ),
-                                text: 'Puzzle',
-                              ),
-                              const SizedBox(height: 10),
-                              _buildGameOption(
-                                context,
-                                icon: const FaIcon(
-                                  FontAwesomeIcons.robot,
-                                  color: Color(0xFF855353),
-                                  size: 24,
-                                ),
-                                text: 'Play with CPU',
-                              ),
-                              const SizedBox(height: 10),
-                              _buildGameOption(
-                                context,
-                                icon: const Icon(
-                                  Icons.people_alt,
-                                  color: Color(0xFF855353),
-                                  size: 24,
-                                ),
-                                text: '2 Players',
-                                onTap: () {
-                                  // Navigate to GameBoard when the card is tapped
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const GameBoard()),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -142,7 +139,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
       onTap: onTap,
       child: Container(
         width: 100,
-        height: 75,
+        height: 65,
         decoration: BoxDecoration(
           color: const Color(0xFFE7C38E),
           borderRadius: BorderRadius.circular(16),

@@ -40,6 +40,11 @@ class _GameBoardState extends State<GameBoard> {
   //state variables for undo/redo functionality
   List<List<List<ChessPiece?>>> boardHistory = [];
   List<List<int>> selectedPieceHistory = [];
+  List<List<ChessPiece>> whitePiecesTakenHistory = [];
+  List<List<ChessPiece>> blackPiecesTakenHistory = [];
+  List<bool> checkStatusHistory = [];
+  List<List<int>> whiteKingPositionHistory = [];
+  List<List<int>> blackKingPositionHistory = [];
   List<bool> turnHistory = [];
   int historyIndex = -1;
 
@@ -243,27 +248,65 @@ class _GameBoardState extends State<GameBoard> {
   }
 
   void _saveBoardState() {
-    boardHistory = boardHistory.sublist(0, historyIndex + 1);
+    if (historyIndex < boardHistory.length - 1) {
+      boardHistory = boardHistory.sublist(0, historyIndex + 1);
+      whitePiecesTakenHistory =
+          whitePiecesTakenHistory.sublist(0, historyIndex + 1);
+      blackPiecesTakenHistory =
+          blackPiecesTakenHistory.sublist(0, historyIndex + 1);
+      checkStatusHistory = checkStatusHistory.sublist(0, historyIndex + 1);
+      whiteKingPositionHistory =
+          whiteKingPositionHistory.sublist(0, historyIndex + 1);
+      blackKingPositionHistory =
+          blackKingPositionHistory.sublist(0, historyIndex + 1);
+      turnHistory = turnHistory.sublist(0, historyIndex + 1);
+    }
+
+    // Add the current state to history
     boardHistory.add(List.generate(8, (i) => List.from(board[i])));
+    whitePiecesTakenHistory.add(List.from(whitePiecesTaken));
+    blackPiecesTakenHistory.add(List.from(blackPiecesTaken));
+    checkStatusHistory.add(checkStatus);
+    whiteKingPositionHistory.add(List.from(whiteKingPosition));
+    blackKingPositionHistory.add(List.from(blackKingPosition));
+    turnHistory.add(isWhiteTurn);
+
+    // Move the history index forward
     historyIndex++;
   }
 
   void undoMove() {
     if (historyIndex > 0) {
-      historyIndex--;
       setState(() {
+        historyIndex--;
         board =
             List.generate(8, (i) => List.from(boardHistory[historyIndex][i]));
+
+        whitePiecesTaken = List.from(whitePiecesTakenHistory[historyIndex]);
+        blackPiecesTaken = List.from(blackPiecesTakenHistory[historyIndex]);
+        // Restore the check status and king positions
+        checkStatus = checkStatusHistory[historyIndex];
+        whiteKingPosition = List.from(whiteKingPositionHistory[historyIndex]);
+        blackKingPosition = List.from(blackKingPositionHistory[historyIndex]);
+        isWhiteTurn = turnHistory[historyIndex];
       });
     }
   }
 
   void redoMove() {
     if (historyIndex < boardHistory.length - 1) {
-      historyIndex++;
       setState(() {
+        historyIndex++;
         board =
             List.generate(8, (i) => List.from(boardHistory[historyIndex][i]));
+
+        whitePiecesTaken = List.from(whitePiecesTakenHistory[historyIndex]);
+        blackPiecesTaken = List.from(blackPiecesTakenHistory[historyIndex]);
+        // Restore the check status and king positions
+        checkStatus = checkStatusHistory[historyIndex];
+        whiteKingPosition = List.from(whiteKingPositionHistory[historyIndex]);
+        blackKingPosition = List.from(blackKingPositionHistory[historyIndex]);
+        isWhiteTurn = turnHistory[historyIndex];
       });
     }
   }
@@ -396,17 +439,46 @@ class _GameBoardState extends State<GameBoard> {
     checkStatus = false;
     whitePiecesTaken.clear();
     blackPiecesTaken.clear();
+    whitePiecesTakenHistory.clear();
+    blackPiecesTakenHistory.clear();
     whiteKingPosition = [7, 3];
     blackKingPosition = [0, 4];
     isWhiteTurn = true;
     setState(() {});
   }
 
+  void _showQuitConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Quit Game"),
+          content: const Text("Are you sure you want to quit the game?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+              child: const Text("Quit"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        onLeadingPressed: () => Navigator.pop(context),
+        onLeadingPressed: () => _showQuitConfirmationDialog(context),
         onSettingsPressed: () {},
         showBackButton: true,
       ),
